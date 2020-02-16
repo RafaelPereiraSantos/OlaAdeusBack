@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const repository = require('./repository')
+// const repository = require('./repository')
 
 router.get('/health', (req, res) => {
   return res.status(200).send("I'm fine, thanks for asking!");
@@ -47,4 +47,4 @@ router.get('/', (req, res) => {
   return res.status(200).send('ok');
 });
 
-module.exports| = router;
+module.exports = router;
