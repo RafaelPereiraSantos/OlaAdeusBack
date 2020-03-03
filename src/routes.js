@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-// const repository = require('./repository')
+const repository = require('./repository')
 
 function authorizedRequest(req, res, next){
-  const unlogged_routes = ['/sign-in', 'health'];
+  const unlogged_routes = ['/sign-in', '/sign-up', 'health'];
   const require_sign_in = unlogged_routes.indexOf(req.path) == -1;
   const did_not_signed = req.session.email == null;
 
@@ -30,22 +30,34 @@ router.post('/sign-up', (req, res) => {
     errors.push({ field: field, error_message: message });
   }
 
-  if (!body.name) {
+  const name = body.name;
+  if (!name) {
     addError('name', 'name required');
   }
 
-  if (!body.email) {
+  const email = body.email;
+  if (!email) {
     addError('email', 'email required');
   }
 
-  if (!body.password) {
+  const password = body.password;
+  if (!password) {
     addError('password', 'password required');
   }
 
+  if (repository.getUserByEmail(email)) {
+    addError('email', 'already in use');
+  }
+
   if (errors.length > 0) {
-    return res.status(400).send(errors);
-  } else {
-    req.session.email = req.body.email;
+    return res.status(400).send({ errors: errors });
+  }
+
+  const success = repository.saveUser(name, email, password);
+
+  if (success) {
+
+    req.session.email = email;
 
     const user_payload = {
       user: {
@@ -55,20 +67,27 @@ router.post('/sign-up', (req, res) => {
 
     return res.status(200).send(user_payload);
   }
+
+  res.status(400).end('whoopsie');
 });
 
 router.post('/sign-in', (req, res) => {
   const body = req.body;
   const email = body.email;
   const password = body.password;
-  const valid_user = typeof password !== 'undefined';
 
-  if (!valid_user) {
-    return res.status(401).send({ error_message: 'Email or password incorrectly' });
+  if (!email || !password) {
+    return res.status(400).send({ error_message: 'Email and password required' });
+  }
+
+  const user = repository.getUserByEmailAndPassword(email, password);
+
+  if (!user) {
+    return res.status(404).send({ error_message: 'Email or password incorreclty' });
   }
 
   req.session.email = email;
-  return res.status(200).end('done');
+  return res.status(200).send(user);
 });
 
 router.post('/sign-out', (req, res) => {

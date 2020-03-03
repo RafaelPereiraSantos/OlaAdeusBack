@@ -4,19 +4,33 @@ const port = process.env.MYSQL_PORT
 const user = process.env.MYSQL_USER
 const pass = process.env.MYSQL_PASSWORD
 
-const con = mysql.createConnection({
-  host: host,
-  port: port,
-  user: user,
-  password: pass
-});
+// TODO create a real connection with mysql maybe with X DevAPI
 
-con.connect(function(err) {
-  if (err) throw err;
-  console.log("Connected!");
-});
+const mockUserReponse = {
+  id: 1,
+  name: 'test user',
+  email: 'test@email.com',
+  created_at: '2020-01-01'
+}
 
+const repository = {
 
-module.exports = {
+  getUserByEmail(email) {
+    if (email == 'test@email.com') {
+      return(mockUserReponse);
+    }
+  },
 
+  getUserByEmailAndPassword(email, password) {
+    if (email == 'test@email.com' && password == 'secret-pass') {
+      return(mockUserReponse);
+    }
+  },
+
+  saveUser(name, email, password) {
+    return true;
+  }
 };
+
+
+module.exports = repository;
