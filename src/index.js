@@ -23,7 +23,10 @@ app.use(session({
       client: redis.createClient({ host: redis_host, port: redis_port })
     }),
     saveUninitialized: false,
-    resave: false
+    resave: false,
+    cookie: {
+      maxAge: 1000 * 60
+    }
 }));
 app.use(require('./routes'));
 
