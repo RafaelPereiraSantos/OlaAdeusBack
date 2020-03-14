@@ -25,7 +25,7 @@ app.use(session({
     saveUninitialized: false,
     resave: false,
     cookie: {
-      maxAge: 1000 * 60
+      maxAge: 1000 * 60 * 10
     }
 }));
 app.use(require('./routes'));

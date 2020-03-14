@@ -1,8 +1,9 @@
-const mysql = require('mysql');
-const host = process.env.MYSQL_HOST
-const port = process.env.MYSQL_PORT
-const user = process.env.MYSQL_USER
-const pass = process.env.MYSQL_PASSWORD
+var mongo = require('mongodb');
+
+const host = process.env.MONGO_HOST
+const port = process.env.MONGO_PORT
+const database = process.env.MONGO_DATABASE
+
 
 // TODO create a real connection with mysql maybe with X DevAPI
 

@@ -56,15 +56,7 @@ router.post('/sign-up', (req, res) => {
   const success = repository.saveUser(name, email, password);
 
   if (success) {
-
     req.session.email = email;
-
-    const user_payload = {
-      user: {
-        name: body.name
-      }
-    };
-
     return res.status(200).send(user_payload);
   }
 
@@ -72,9 +64,9 @@ router.post('/sign-up', (req, res) => {
 });
 
 router.post('/sign-in', (req, res) => {
-  const body = req.body;
-  const email = body.email;
-  const password = body.password;
+  const body_user = req.body.user;
+  const email = body_user.email_address;
+  const password = body_user.password;
 
   if (!email || !password) {
     return res.status(400).send({ error_message: 'Email and password required' });
@@ -95,8 +87,19 @@ router.post('/sign-out', (req, res) => {
   res.status(200).end('done');
 });
 
+router.get('/user', (req, res) => {
+  const email = req.session.email;
+  const user = repository.getUserByEmail(email);
+
+  if (!user) { return res.status(404).end() };
+
+  res.status(200).send({
+    name: user.name,
+    email: user.email
+  });
+});
+
 router.post('/punch', (req, res) => {
-  console.log(req.session);
   res.status(201).end('done');
 });
 
