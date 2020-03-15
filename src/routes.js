@@ -64,9 +64,9 @@ router.post('/sign-up', (req, res) => {
 });
 
 router.post('/sign-in', (req, res) => {
-  const body_user = req.body.user;
-  const email = body_user.email_address;
-  const password = body_user.password;
+  const body = req.body;
+  const email = body.email_address;
+  const password = body.password;
 
   if (!email || !password) {
     return res.status(400).send({ error_message: 'Email and password required' });
@@ -75,7 +75,7 @@ router.post('/sign-in', (req, res) => {
   const user = repository.getUserByEmailAndPassword(email, password);
 
   if (!user) {
-    return res.status(404).send({ error_message: 'Email or password incorreclty' });
+    return res.status(400).send({ error_message: 'Email or password incorreclty' });
   }
 
   req.session.email = email;
