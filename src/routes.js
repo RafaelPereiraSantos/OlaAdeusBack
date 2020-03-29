@@ -35,7 +35,7 @@ router.post('/sign-up', (req, res) => {
     addError('name', 'name required');
   }
 
-  const email = body.email;
+  const email = body.email_address;
   if (!email) {
     addError('email', 'email required');
   }
@@ -57,7 +57,7 @@ router.post('/sign-up', (req, res) => {
 
   if (success) {
     req.session.email = email;
-    return res.status(200).send(user_payload);
+    return res.status(200).end();
   }
 
   res.status(400).end('whoopsie');
