@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const port = process.env.PORT;
 const secrets = process.env.SESSION_SECRET;
-const redis_host = process.env.REDIS_HOST
 const redis_port = process.env.REDIS_PORT
 
 const express = require('express');
@@ -20,7 +19,7 @@ app.use(bodyParser.json());
 app.use(session({
     secret: secrets,
     store: new redisStore({
-      client: redis.createClient({ host: redis_host, port: redis_port })
+      client: redis.createClient({ host: 'redis-server', port: redis_port })
     }),
     saveUninitialized: false,
     resave: false,
@@ -31,3 +30,5 @@ app.use(session({
 app.use(require('./routes'));
 
 app.listen(port, () => console.log(`Service up on port: ${port}`));
+
+module.exports = app;
