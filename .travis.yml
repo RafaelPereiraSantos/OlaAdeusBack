@@ -4,7 +4,8 @@ services:
   - redis-server
 
 before_install:
-  - docker build -t rafaelpsantos/ola-adeus-back -f Dockerfile.dev . --build-arg REDIS_HOST='172.21.0.2'
+  - sudo service redis-server start --bind 127.0.0.1
+  - docker build -t rafaelpsantos/ola-adeus-back -f Dockerfile.dev .
 
 script:
   - docker run -e REDIS_HOST='127.0.0.1' rafaelpsantos/ola-adeus-back npm test -- --coverage
