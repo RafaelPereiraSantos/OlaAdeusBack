@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 app.use(session({
     secret: secrets,
     store: new redisStore({
-      client: redis.createClient({ host: 'redis-server', port: redis_port })
+      client: redis.createClient({ host: 'redis', port: redis_port })
     }),
     saveUninitialized: false,
     resave: false,
