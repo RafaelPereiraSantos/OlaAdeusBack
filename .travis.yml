@@ -1,0 +1,10 @@
+sudo: required
+services:
+  - docker
+  - redis-server
+
+before_install:
+  - docker build -t rafaelpsantos/ola-adeus-back -f Dockerfile.dev .
+
+script:
+  - DOCKER RUN rafaelpsantos/ola-adeus-back npm test -- --coverage
