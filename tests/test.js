@@ -8,12 +8,12 @@ chai.should();
 
 describe('health', () => {
   describe('get /', () => {
-    it('returns that everthing is OK and thanks for asking', (done) => {
+    it('returns that everthing is OK and thanks us for asking', (done) => {
       chai.request(app)
           .get('/health')
-          .end((error, resp) => {
+          .end((error, res) => {
             res.should.have.status(200);
-            res.body.should.be("I'm fine, thanks for asking!");
+            res.text.should.equal("I'm fine, thanks for asking!");
             done();
           })
     })

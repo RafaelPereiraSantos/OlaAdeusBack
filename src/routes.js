@@ -3,7 +3,7 @@ const router = express.Router();
 const repository = require('./repository')
 
 function authorizedRequest(req, res, next){
-  const unlogged_routes = ['/sign-in', '/sign-up', 'health'];
+  const unlogged_routes = ['/sign-in', '/sign-up', '/health'];
   const require_sign_in = unlogged_routes.indexOf(req.path) == -1;
   const did_not_signed = req.session.email == null;
 
