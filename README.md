@@ -1,4 +1,5 @@
-# OlaAdeusBack
+# OlaAdeusBack [![Build Status](https://travis-ci.org/RafaelPSantos/OlaAdeusBack.svg?branch=master)](https://travis-ci.org/RafaelPSantos/OlaAdeusBack)
+
 
   Back end of OlaAdeus project
 
