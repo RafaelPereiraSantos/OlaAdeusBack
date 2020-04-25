@@ -1,8 +1,9 @@
-sudo: required
+language: node_js
+
 services:
-  - docker
-  - redis-server
+  - redis
   - mongodb
+  - docker
 
 before_install:
   - make build
