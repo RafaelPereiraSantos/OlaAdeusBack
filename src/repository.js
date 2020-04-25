@@ -9,19 +9,9 @@ const database = process.env.MONGO_DATABASE;
 const collection = 'users';
 const url = 'mongodb://' + MONGO_HOST + ':' + MONGO_PORT + '/';
 
-const mockUserReponse = {
-  id: 1,
-  name: 'test user',
-  email: 'test@email.com',
-  created_at: '2020-01-01'
-};
-
 const withConnection = (success) => {
   client.connect(url, { poolSize: 10 }, (err, con) => {
-    if (err) {
-      console.log(err)
-      return false;
-    }
+    if (err) throw err
     const resp = success(con);
     return resp;
   });
