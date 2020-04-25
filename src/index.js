@@ -2,8 +2,8 @@ require('dotenv').config();
 
 const port = process.env.PORT;
 const secrets = process.env.SESSION_SECRET;
-const redis_port = process.env.REDIS_PORT
-const redis_host = process.env.REDIS_HOST
+const redis_port = process.env.REDIS_PORT;
+const redis_host = process.env.REDIS_HOST;
 
 const express = require('express');
 const session = require('express-session');
@@ -13,6 +13,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const app = express();
+
+const repository = require('./repository')
 
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
@@ -28,6 +30,9 @@ app.use(session({
       maxAge: 1000 * 60 * 10
     }
 }));
+
+repository.createCollection();
+
 app.use(require('./routes'));
 
 app.listen(port, () => console.log(`Service up on port: ${port}`));
