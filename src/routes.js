@@ -26,16 +26,14 @@ router.post('/sign-up', (req, res) => {
   const body = req.body;
   let errors = [];
 
-  function addError(field, message) {
-    errors.push({ field: field, error_message: message });
-  }
+  addError = (field, message) => errors.push({ field: field, error_message: message });
 
   const name = body.name;
   if (!name) {
     addError('name', 'name required');
   }
 
-  const email = body.email_address;
+  const email = body.email;
   if (!email) {
     addError('email', 'email required');
   }
@@ -69,17 +67,26 @@ router.post('/sign-in', (req, res) => {
   const password = body.password;
 
   if (!email || !password) {
-    return res.status(400).send({ error_message: 'Email and password required' });
+    return res.status(400).send({
+      error_message: 'Email and password required'
+    });
   }
 
-  const user = repository.getUserByEmailAndPassword(email, password);
+  repository.getUserByEmailAndPassword(email, password, (err, user) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).end();
+    }
 
-  if (!user) {
-    return res.status(400).send({ error_message: 'Email or password incorreclty' });
-  }
+    if (!user) {
+      return res.status(400).send({
+        error_message: 'Email or password incorreclty'
+      });
+    }
 
-  req.session.email = email;
-  return res.status(200).send(user);
+    req.session.email = email;
+    return res.status(200).send(user);
+  });
 });
 
 router.post('/sign-out', (req, res) => {
@@ -89,13 +96,12 @@ router.post('/sign-out', (req, res) => {
 
 router.get('/user', (req, res) => {
   const email = req.session.email;
-  const user = repository.getUserByEmail(email);
-
-  if (!user) { return res.status(404).end() };
-
-  res.status(200).send({
-    name: user.name,
-    email: user.email
+  const user = repository.getUserByEmail(email, (err, user) => {
+    if (!user) return res.status(404).end();
+    res.status(200).send({
+      name: user.name,
+      email: user.email
+    });
   });
 });
 

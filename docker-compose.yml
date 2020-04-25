@@ -2,6 +2,8 @@ version: '3'
 services:
   redis:
     image: 'redis'
+  mongo:
+    image: mongo
   ola-adeus-app:
     restart: always
     build: .
