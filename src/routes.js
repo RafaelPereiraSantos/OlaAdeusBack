@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const repository = require('./repository')
 
-function authorizedRequest(req, res, next){
+function authorizedRequest(req, res, next) {
   const unlogged_routes = ['/sign-in', '/sign-up', '/health'];
   const require_sign_in = unlogged_routes.indexOf(req.path) == -1;
   const did_not_signed = req.session.email == null;
@@ -26,7 +26,9 @@ router.post('/sign-up', (req, res) => {
   const body = req.body;
   let errors = [];
 
-  addError = (field, message) => errors.push({ field: field, error_message: message });
+  const addError = (field, message) => {
+    errors.push({ field: field, error_message: message });
+  }
 
   const name = body.name;
   if (!name) {
@@ -43,22 +45,30 @@ router.post('/sign-up', (req, res) => {
     addError('password', 'password required');
   }
 
-  if (repository.getUserByEmail(email)) {
-    addError('email', 'already in use');
-  }
-
   if (errors.length > 0) {
     return res.status(400).send({ errors: errors });
   }
 
-  const success = repository.saveUser(name, email, password);
+  repository.getUserByEmail(email, (err, user) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).end();
+    }
 
-  if (success) {
-    req.session.email = email;
-    return res.status(200).end();
-  }
-
-  res.status(400).end('whoopsie');
+    if (user) {
+      addError('email', 'already in use');
+      return res.status(400).send({ errors: errors });
+    } else {
+      repository.saveUser(name, email, password, (err, result) => {
+        if (err || !result) {
+          res.status(500).end();
+        } else {
+          req.session.email = email;
+          res.status(200).end();
+        }
+      });
+    }
+  });
 });
 
 router.post('/sign-in', (req, res) => {
@@ -98,6 +108,7 @@ router.get('/user', (req, res) => {
   const email = req.session.email;
   const user = repository.getUserByEmail(email, (err, user) => {
     if (!user) return res.status(404).end();
+    console.log(user);
     res.status(200).send({
       name: user.name,
       email: user.email
@@ -105,31 +116,43 @@ router.get('/user', (req, res) => {
   });
 });
 
+// TODO use user slug to retrive their punches and save them as well
+
 router.post('/punch', (req, res) => {
-  res.status(201).end('done');
+  const body = req.body;
+
+  const user_slug = body.user_slug;
+  const time = body.time;
+  const type = body.type;
+
+  repository.savePunch(user_slug, time, type, (err, result) => {
+    if (err) {
+      return res.status(500).end();
+    }
+    res.status(201).end('done');
+  });
 });
 
-router.get('/punches', (req, res) => {
-  res.status(200).send(
-    [
-      {
-        description: 'Entrada',
-        time: '12:00'
-      },
-      {
-        description: 'Saida Almoço',
-        time: '12:00'
-      },
-      {
-        description: 'Volta Almoço',
-        time: '12:00'
-      },
-      {
-        description: 'Saida',
-        time: '12:00'
-      }
-    ]
-  );
+router.get('/user/:user_slug/punches', (req, res) => {
+  const body = req.body;
+
+  const time = body.time;
+  const user_slug = req.params.user_slug;
+
+  const respond_request = (err, result) => {
+    if (err) {
+      return res.status(500).end();
+    }
+
+    let status = result.length == 0 ? 404 : 200;
+    res.status(status).send(result)
+  };
+
+  if(time) {
+    repository.userPunches(user_slug, time, respond_request);
+  } else {
+    repository.allUserPunches(user_slug, respond_request);
+  }
 });
 
 module.exports = router;
