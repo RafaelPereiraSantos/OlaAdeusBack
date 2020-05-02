@@ -49,26 +49,30 @@ router.post('/sign-up', (req, res) => {
     return res.status(400).send({ errors: errors });
   }
 
-  repository.getUserByEmail(email, (err, user) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).end();
-    }
+  try {
+    repository.getUserByEmail(email, (err, user) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).end();
+      }
 
-    if (user) {
-      addError('email', 'already in use');
-      return res.status(400).send({ errors: errors });
-    } else {
-      repository.saveUser(name, email, password, (err, result) => {
-        if (err || !result) {
-          res.status(500).end();
-        } else {
-          req.session.email = email;
-          res.status(200).end();
-        }
-      });
-    }
+      if (user) {
+        addError('email', 'already in use');
+        return res.status(400).send({ errors: errors });
+      } else {
+        repository.saveUser(name, email, password, (err, result) => {
+          if (err || !result) {
+            res.status(500).end();
+          } else {
+            req.session.email = email;
+            res.status(200).end();
+          }
+        });
+      }
   });
+  } catch(e) {
+
+  }
 });
 
 router.post('/sign-in', (req, res) => {
@@ -111,12 +115,11 @@ router.get('/user', (req, res) => {
     console.log(user);
     res.status(200).send({
       name: user.name,
-      email: user.email
+      email: user.email,
+      slug: user.slug
     });
   });
 });
-
-// TODO use user slug to retrive their punches and save them as well
 
 router.post('/punch', (req, res) => {
   const body = req.body;
@@ -134,9 +137,6 @@ router.post('/punch', (req, res) => {
 });
 
 router.get('/user/:user_slug/punches', (req, res) => {
-  const body = req.body;
-
-  const time = body.time;
   const user_slug = req.params.user_slug;
 
   const respond_request = (err, result) => {
@@ -144,15 +144,27 @@ router.get('/user/:user_slug/punches', (req, res) => {
       return res.status(500).end();
     }
 
-    let status = result.length == 0 ? 404 : 200;
-    res.status(status).send(result)
+    const status = result.length == 0 ? 404 : 200;
+    return res.status(status).send(result)
   };
 
-  if(time) {
-    repository.userPunches(user_slug, time, respond_request);
-  } else {
-    repository.allUserPunches(user_slug, respond_request);
-  }
+  repository.getUserBySlug(user_slug, (err, user) => {
+    if (err) return res.status(500).end();
+
+    if (user) {
+      repository.allUserPunches(user._id, (err, punches) => {
+        if (err) return res.status(500).end();
+
+        if(req.query && req.query.date) {
+          repository.userPunches(user_slug, req.query.date, respond_request);
+        } else {
+          repository.allUserPunches(user_slug, respond_request);
+        }
+      })
+    } else {
+      res.status(404).end();
+    }
+  });
 });
 
 module.exports = router;
