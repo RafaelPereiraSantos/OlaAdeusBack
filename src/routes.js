@@ -140,27 +140,25 @@ router.get('/user/:user_slug/punches', (req, res) => {
   const user_slug = req.params.user_slug;
 
   const respond_request = (err, result) => {
-    if (err) {
-      return res.status(500).end();
-    }
+    if (err) return res.status(500).end();
 
     const status = result.length == 0 ? 404 : 200;
-    return res.status(status).send(result)
+    res.status(status).send(result)
   };
 
   repository.getUserBySlug(user_slug, (err, user) => {
     if (err) return res.status(500).end();
 
     if (user) {
-      repository.allUserPunches(user._id, (err, punches) => {
-        if (err) return res.status(500).end();
-
-        if(req.query && req.query.date) {
-          repository.userPunches(user_slug, req.query.date, respond_request);
-        } else {
-          repository.allUserPunches(user_slug, respond_request);
-        }
-      })
+      if (err) return res.status(500).end();
+      console.log(req.query);
+      console.log(req.query.date);
+      console.log(1111111);
+      // if(req.query && req.query.date) {
+      //   repository.userPunches(user._id, req.query.date, respond_request);
+      // } else {
+        repository.userPunches(user._id, null, respond_request);
+      // }
     } else {
       res.status(404).end();
     }
