@@ -124,11 +124,11 @@ router.get('/user', (req, res) => {
 router.post('/punch', (req, res) => {
   const body = req.body;
 
-  const user_slug = body.user_slug;
-  const time = body.time;
-  const type = body.type;
+  const user_id = body.user_id;
+  const date = body.date;
+  const punch_type = body.type;
 
-  repository.savePunch(user_slug, time, type, (err, result) => {
+  repository.savePunch(user_id, date, punch_type, (err, result) => {
     if (err) {
       return res.status(500).end();
     }
@@ -141,7 +141,6 @@ router.get('/user/:user_slug/punches', (req, res) => {
 
   const respond_request = (err, result) => {
     if (err) return res.status(500).end();
-
     const status = result.length == 0 ? 404 : 200;
     res.status(status).send(result)
   };
@@ -151,14 +150,7 @@ router.get('/user/:user_slug/punches', (req, res) => {
 
     if (user) {
       if (err) return res.status(500).end();
-      console.log(req.query);
-      console.log(req.query.date);
-      console.log(1111111);
-      // if(req.query && req.query.date) {
-      //   repository.userPunches(user._id, req.query.date, respond_request);
-      // } else {
-        repository.userPunches(user._id, null, respond_request);
-      // }
+      repository.userPunches(user._id, req.query.date, respond_request);
     } else {
       res.status(404).end();
     }

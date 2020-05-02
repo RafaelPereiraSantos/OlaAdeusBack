@@ -105,22 +105,23 @@ function saveUser(name, email, password, then) {
   generateSlug(name);
 };
 
-function userPunches(id, date, then) {
+function userPunches(user_id, date, then) {
   withConnection((con) => {
     const db = con.db(database);
-    let filter = { _id: id };
+    let filter = { user_id: user_id.toString() };
     if (date) filter['date'] = date;
-    db.collection(punch_collection).find(filter, (err, res) => {
+    db.collection(punch_collection).find(filter).toArray((err, res) => {
       con.close();
       return then(err, res);
     });
   });
 };
 
-function savePunch(user_slug, time, type, then) {
+function savePunch(user_id, date, punch_type, then) {
   withConnection((con) => {
     const db = con.db(database);
-    const new_punch = { user: user_slug, time: time, type: type };
+    const new_punch = { user_id: user_id, date: date, punch_type: punch_type };
+    console.log(new_punch);
     db.collection(punch_collection).insertOne(new_punch, (err, res) => {
       con.close();
       return then(err, res);
