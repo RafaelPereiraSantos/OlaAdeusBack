@@ -117,10 +117,10 @@ function userPunches(user_id, date, then) {
   });
 };
 
-function savePunch(user_id, date, punch_type, then) {
+function savePunch(user_id, date, time, punch_type, then) {
   withConnection((con) => {
     const db = con.db(database);
-    const new_punch = { user_id: user_id, date: date, punch_type: punch_type };
+    const new_punch = { user_id: user_id, date: date, time: time, punch_type: punch_type };
     console.log(new_punch);
     db.collection(punch_collection).insertOne(new_punch, (err, res) => {
       con.close();

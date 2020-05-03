@@ -126,9 +126,22 @@ router.post('/punch', (req, res) => {
 
   const user_id = body.user_id;
   const date = body.date;
+  const time = body.time;
   const punch_type = body.type;
 
-  repository.savePunch(user_id, date, punch_type, (err, result) => {
+  if (!user_id || !date || !time || !punch_type) {
+    return res.status(400).send({
+      error_message: 'user_id, date, time and type are required in payload'
+    });
+  }
+
+  if (new Date(date + ' ' + time) == 'Invalid Date') {
+    return res.status(400).send({
+      error_message: 'bad format for: date or time'
+    });
+  }
+
+  repository.savePunch(user_id, date, time, punch_type, (err, result) => {
     if (err) {
       return res.status(500).end();
     }
