@@ -20,7 +20,7 @@ function withConnection(success) {
 };
 
 function createCollections(then) {
-  const createCollection = (collection) => {
+  const createCollection = (collection, then) => {
     withConnection((con) => {
       const db = con.db(database);
       db.listCollections({ name: collection })
@@ -38,8 +38,8 @@ function createCollections(then) {
     })
   }
 
-  createCollection(user_collection);
-  createCollection(punch_collection);
+  const createPunches = () => createCollection(punch_collection, then);
+  createCollection(user_collection, createPunches);
 };
 
 function getUserByEmail(email, then) {
