@@ -14,7 +14,26 @@ function authorizedRequest(req, res, next) {
 
   console.log('Authorized');
   next();
-}
+};
+
+function punchRepresentation(punch) {
+  return {
+    id: punch._id,
+    date: punch.date,
+    time: punch.time,
+    type: punch.punch_type,
+    user_id: punch.user_id
+  };
+};
+
+function userRepresentation(user) {
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    slug: user.slug
+  };
+};
 
 router.use(authorizedRequest);
 
@@ -60,12 +79,12 @@ router.post('/sign-up', (req, res) => {
         addError('email', 'already in use');
         return res.status(400).send({ errors: errors });
       } else {
-        repository.saveUser(name, email, password, (err, result) => {
-          if (err || !result) {
+        repository.saveUser(name, email, password, (err, new_user) => {
+          if (err || !new_user) {
             res.status(500).end();
           } else {
             req.session.email = email;
-            res.status(200).end();
+            res.status(201).send(userRepresentation(new_user));
           }
         });
       }
@@ -99,7 +118,7 @@ router.post('/sign-in', (req, res) => {
     }
 
     req.session.email = email;
-    return res.status(200).send(user);
+    return res.status(200).send(userRepresentation(user));
   });
 });
 
@@ -113,11 +132,7 @@ router.get('/user', (req, res) => {
   const user = repository.getUserByEmail(email, (err, user) => {
     if (!user) return res.status(404).end();
     console.log(user);
-    res.status(200).send({
-      name: user.name,
-      email: user.email,
-      slug: user.slug
-    });
+    res.status(200).send(userRepresentation(user));
   });
 });
 
@@ -141,21 +156,21 @@ router.post('/punch', (req, res) => {
     });
   }
 
-  repository.savePunch(user_id, date, time, punch_type, (err, result) => {
+  repository.savePunch(user_id, date, time, punch_type, (err, punch) => {
     if (err) {
       return res.status(500).end();
     }
-    res.status(201).end('done');
+    res.status(201).send(punchRepresentation(punch));
   });
 });
 
 router.get('/user/:user_slug/punches', (req, res) => {
   const user_slug = req.params.user_slug;
 
-  const respond_request = (err, result) => {
+  const respond_request = (err, punches) => {
     if (err) return res.status(500).end();
-    const status = result.length == 0 ? 404 : 200;
-    res.status(status).send(result)
+    const status = punches.length == 0 ? 404 : 200;
+    res.status(status).send(punches.map((punch) => punchRepresentation(punch)))
   };
 
   repository.getUserBySlug(user_slug, (err, user) => {

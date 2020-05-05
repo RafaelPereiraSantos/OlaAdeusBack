@@ -81,28 +81,26 @@ function saveUser(name, email, password, then) {
       const new_user = { name: name, email: email, password: password, slug: slug };
       db.collection(user_collection).insertOne(new_user, (err, res) => {
         con.close();
-        return then(err, res);
+        return then(err, res.ops[0]);
       });
     })
   }
 
-  let error = null;
-
+  const normalized_name = name.split(' ').filter((value) => value).join('-');
   const generateSlug = (slug) => {
-    const normalized_name = name.split(' ').filter((value) => value).join('-');
-    getUserBySlug(normalized_name, (err, res) => {
+    getUserBySlug(slug, (err, res) => {
       if (err) {
         return then(err, res);
       } else if (res) {
         const new_slug_attempt = token.generate(normalized_name);
         generateSlug(new_slug_attempt);
       } else {
-        save(normalized_name);
+        save(slug);
       }
     })
   };
 
-  generateSlug(name);
+  generateSlug(normalized_name);
 };
 
 function userPunches(user_id, date, then) {
@@ -124,7 +122,7 @@ function savePunch(user_id, date, time, punch_type, then) {
     console.log(new_punch);
     db.collection(punch_collection).insertOne(new_punch, (err, res) => {
       con.close();
-      return then(err, res);
+      return then(err, res.ops[0]);
     });
   });
 };
