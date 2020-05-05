@@ -4,6 +4,9 @@ const mocha = require('mocha');
 const repository = require('../src/repository.js');
 
 describe('repository', () => {
+
+  before((done) => repository.createCollections(done))
+
   describe('.userPunches', () => {
      it('returns all user punches of a given day', (done) => {
 

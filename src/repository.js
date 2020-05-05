@@ -19,7 +19,7 @@ function withConnection(success) {
   });
 };
 
-function createCollections() {
+function createCollections(then) {
   const createCollection = (collection) => {
     withConnection((con) => {
       const db = con.db(database);
@@ -32,6 +32,7 @@ function createCollections() {
             });
           } else {
             con.close();
+            if (then) then();
           }
       });
     })
