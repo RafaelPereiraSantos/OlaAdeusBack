@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "test": "NODE_ENV=development mocha tests/*.js --exit"
+    "test": "NODE_ENV=development mocha tests/*.js --exit --timeout 5000"
   },
   "author": "Rafael Pereira Santos",
   "license": "ISC",
