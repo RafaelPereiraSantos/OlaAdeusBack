@@ -33,11 +33,12 @@ function createCollections(then) {
           if (!collinfo) {
             db.createCollection(collection, function(err, res) {
               if (err) throw err;
+              if (then) then();
               con.close();
             });
           } else {
-            con.close();
             if (then) then();
+            con.close();
           }
       });
     })
