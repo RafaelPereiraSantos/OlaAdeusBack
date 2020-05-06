@@ -9,8 +9,9 @@ before_install:
   - make build
 
 before_script:
-  - sleep 15
-  - mongo db -eval 'db.serverCmdLineOpts()'
+  - sleep 30
+  - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
+  - sleep 30
 
 script:
   - make test
