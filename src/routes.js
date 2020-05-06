@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const repository = require('./repository')
+const repository = require('./repository');
 
 function authorizedRequest(req, res, next) {
   const unlogged_routes = ['/sign-in', '/sign-up', '/health'];
