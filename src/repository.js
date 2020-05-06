@@ -12,7 +12,12 @@ const punch_collection = 'punches';
 const url = 'mongodb://' + MONGO_HOST + ':' + MONGO_PORT + '/';
 
 function withConnection(success) {
-  client.connect(url, { poolSize: 10 }, (err, con) => {
+  client.connect(
+    url,
+    {
+      reconnectTries: 3,
+      reconnectInterval: 1000
+    }, (err, con) => {
     if (err) throw err
     const resp = success(con);
     return resp;
