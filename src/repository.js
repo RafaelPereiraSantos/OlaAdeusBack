@@ -15,8 +15,8 @@ function withConnection(success) {
   client.connect(
     url,
     {
-      reconnectTries: 3,
-      reconnectInterval: 1000
+      reconnectTries: 60,
+      reconnectInterval: 500
     }, (err, con) => {
     if (err) throw err
     const resp = success(con);
