@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const repository = require('./repository')
+const repository = require('./repository');
 
-function authorizedRequest(req, res, next){
+function authorizedRequest(req, res, next) {
   const unlogged_routes = ['/sign-in', '/sign-up', '/health'];
   const require_sign_in = unlogged_routes.indexOf(req.path) == -1;
   const did_not_signed = req.session.email == null;
@@ -14,7 +14,26 @@ function authorizedRequest(req, res, next){
 
   console.log('Authorized');
   next();
-}
+};
+
+function punchRepresentation(punch) {
+  return {
+    id: punch._id,
+    date: punch.date,
+    time: punch.time,
+    type: punch.punch_type,
+    user_id: punch.user_id
+  };
+};
+
+function userRepresentation(user) {
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    slug: user.slug
+  };
+};
 
 router.use(authorizedRequest);
 
@@ -26,7 +45,9 @@ router.post('/sign-up', (req, res) => {
   const body = req.body;
   let errors = [];
 
-  addError = (field, message) => errors.push({ field: field, error_message: message });
+  const addError = (field, message) => {
+    errors.push({ field: field, error_message: message });
+  }
 
   const name = body.name;
   if (!name) {
@@ -43,22 +64,34 @@ router.post('/sign-up', (req, res) => {
     addError('password', 'password required');
   }
 
-  if (repository.getUserByEmail(email)) {
-    addError('email', 'already in use');
-  }
-
   if (errors.length > 0) {
     return res.status(400).send({ errors: errors });
   }
 
-  const success = repository.saveUser(name, email, password);
+  try {
+    repository.getUserByEmail(email, (err, user) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).end();
+      }
 
-  if (success) {
-    req.session.email = email;
-    return res.status(200).end();
+      if (user) {
+        addError('email', 'already in use');
+        return res.status(400).send({ errors: errors });
+      } else {
+        repository.saveUser(name, email, password, (err, new_user) => {
+          if (err || !new_user) {
+            res.status(500).end();
+          } else {
+            req.session.email = email;
+            res.status(201).send(userRepresentation(new_user));
+          }
+        });
+      }
+  });
+  } catch(e) {
+
   }
-
-  res.status(400).end('whoopsie');
 });
 
 router.post('/sign-in', (req, res) => {
@@ -85,7 +118,7 @@ router.post('/sign-in', (req, res) => {
     }
 
     req.session.email = email;
-    return res.status(200).send(user);
+    return res.status(200).send(userRepresentation(user));
   });
 });
 
@@ -98,38 +131,58 @@ router.get('/user', (req, res) => {
   const email = req.session.email;
   const user = repository.getUserByEmail(email, (err, user) => {
     if (!user) return res.status(404).end();
-    res.status(200).send({
-      name: user.name,
-      email: user.email
-    });
+    console.log(user);
+    res.status(200).send(userRepresentation(user));
   });
 });
 
 router.post('/punch', (req, res) => {
-  res.status(201).end('done');
+  const body = req.body;
+
+  const user_id = body.user_id;
+  const date = body.date;
+  const time = body.time;
+  const punch_type = body.type;
+
+  if (!user_id || !date || !time || !punch_type) {
+    return res.status(400).send({
+      error_message: 'user_id, date, time and type are required in payload'
+    });
+  }
+
+  if (new Date(date + ' ' + time) == 'Invalid Date') {
+    return res.status(400).send({
+      error_message: 'bad format for: date or time'
+    });
+  }
+
+  repository.savePunch(user_id, date, time, punch_type, (err, punch) => {
+    if (err) {
+      return res.status(500).end();
+    }
+    res.status(201).send(punchRepresentation(punch));
+  });
 });
 
-router.get('/punches', (req, res) => {
-  res.status(200).send(
-    [
-      {
-        description: 'Entrada',
-        time: '12:00'
-      },
-      {
-        description: 'Saida Almoço',
-        time: '12:00'
-      },
-      {
-        description: 'Volta Almoço',
-        time: '12:00'
-      },
-      {
-        description: 'Saida',
-        time: '12:00'
-      }
-    ]
-  );
+router.get('/user/:user_slug/punches', (req, res) => {
+  const user_slug = req.params.user_slug;
+
+  const respond_request = (err, punches) => {
+    if (err) return res.status(500).end();
+    const status = punches.length == 0 ? 404 : 200;
+    res.status(status).send(punches.map((punch) => punchRepresentation(punch)))
+  };
+
+  repository.getUserBySlug(user_slug, (err, user) => {
+    if (err) return res.status(500).end();
+
+    if (user) {
+      if (err) return res.status(500).end();
+      repository.userPunches(user._id, req.query.date, respond_request);
+    } else {
+      res.status(404).end();
+    }
+  });
 });
 
 module.exports = router;

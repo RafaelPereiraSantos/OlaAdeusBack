@@ -8,7 +8,7 @@ chai.should();
 
 describe('logged routes', () => {
   describe('when request without sesion', () => {
-    it('returns 401 unauthorizeda', (done) => {
+    it('returns 401 unauthorized', (done) => {
       chai.request(app)
           .get('/user')
           .end((error, res) => {
@@ -17,4 +17,4 @@ describe('logged routes', () => {
           })
     })
   })
-})
+});

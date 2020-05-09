@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "test": "NODE_ENV=development mocha tests/*.js --exit"
+    "test": "NODE_ENV=development mocha tests/*.js --exit --timeout 5000"
   },
   "author": "Rafael Pereira Santos",
   "license": "ISC",
   "dependencies": {
+    "base-64": "^0.1.0",
     "body-parser": "^1.19.0",
     "connect-redis": "^4.0.4",
     "cors": "^2.8.5",

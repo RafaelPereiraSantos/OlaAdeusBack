@@ -31,7 +31,7 @@ app.use(session({
     }
 }));
 
-repository.createCollection();
+repository.createCollections();
 
 app.use(require('./routes'));
 
