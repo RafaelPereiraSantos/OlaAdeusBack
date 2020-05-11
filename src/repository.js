@@ -15,8 +15,7 @@ function withConnection(success) {
   client.connect(
     url,
     {
-      reconnectTries: 60,
-      reconnectInterval: 500
+      useUnifiedTopology: true
     }, (err, con) => {
     if (err) throw err
     const resp = success(con);
