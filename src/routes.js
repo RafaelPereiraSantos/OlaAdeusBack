@@ -124,7 +124,7 @@ router.post('/sign-in', (req, res) => {
 
 router.post('/sign-out', (req, res) => {
   req.session.destroy();
-  res.status(200).end('done');
+  res.status(200).send({});
 });
 
 router.get('/user', (req, res) => {
