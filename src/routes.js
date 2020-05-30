@@ -38,7 +38,7 @@ function userRepresentation(user) {
 router.use(authorizedRequest);
 
 router.get('/health', (req, res) => {
-  return res.status(200).send("I'm fine, thanks for asking!");
+  return res.status(200).send("I'm fine, thanks for asaaaking!");
 });
 
 router.post('/sign-up', (req, res) => {
